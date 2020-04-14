@@ -1,0 +1,7 @@
+{
+  "client_id": "",
+  "team_id": "",
+  "key_id": "",
+  "redirect_uri": "https://apple-auth.example.com/auth.php",
+  "scope": "name email"
+}

@@ -1,0 +1,23 @@
+{
+    "name": "rasmusbe/signin-with-apple",
+    "description": "A package to verify and authenticate with Sign in with Apple",
+    "type": "library",
+    "require": {
+        "php": "^7.2",
+        "ext-json": "*",
+        "web-token/jwt-framework": "^2.1",
+        "php-curl-class/php-curl-class": "^8.7"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rasmus Bengtsson",
+            "email": "2124386+rasmusbe@users.noreply.github.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "SignInWithApple\\": "src/"
+        }
+    }
+}
