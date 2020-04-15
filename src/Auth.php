@@ -41,21 +41,30 @@ class Auth
         return 'https://appleid.apple.com/auth/authorize?' . $queryString;
     }
 
-    public function getAccessToken(string $authCode): AccessToken
+    public function getAccessToken(string $code, bool $refreshToken = false): AccessToken
     {
         $clientSecret = $this->clientSecret->generateToken();
 
         $curl = new Curl();
         $curl->setHeader('content-type', 'application/x-www-form-urlencoded');
 
+        $payload = [
+            'redirect_uri'  => $this->config['redirect_uri'],
+            'client_id'     => $this->config['client_id'],
+            'client_secret' => $clientSecret,
+            'scope'         => $this->config['scope'],
+        ];
+
+        if ($refreshToken) {
+            $payload['grant_type']    = 'refresh_token';
+            $payload['refresh_token'] = $code;
+        } else {
+            $payload['grant_type'] = 'authorization_code';
+            $payload['code']       = $code;
+        }
+
         try {
-            $payload = $curl->buildPostData([
-                'grant_type'    => 'authorization_code',
-                'code'          => $authCode,
-                'redirect_uri'  => $this->config['redirect_uri'],
-                'client_id'     => $this->config['client_id'],
-                'client_secret' => $clientSecret,
-            ]);
+            $payload = $curl->buildPostData($payload);
         } catch (ErrorException $e) {
             throw new RuntimeException('Unable to build payload', E_USER_ERROR, $e);
         }

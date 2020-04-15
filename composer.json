@@ -19,5 +19,8 @@
         "psr-4": {
             "SignInWithApple\\": "src/"
         }
+    },
+    "archive": {
+        "exclude": ["/demo"]
     }
 }

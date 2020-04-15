@@ -11,13 +11,22 @@ $config = json_decode(
 
 $auth = new Auth($config, __DIR__ . DIRECTORY_SEPARATOR . 'AuthKey.p8');
 
-$authCode = $_POST['code'];
-$user     = isset($_POST['user']) ? json_decode($_POST['user'], true) : null;
+if ($_REQUEST['refresh']) {
+    $token = $auth->getAccessToken($_REQUEST['token'], true);
+} else {
+    $token = $auth->getAccessToken($_REQUEST['code']);
+}
 
 echo "<pre>";
-printf('authcode: "%s"' . PHP_EOL, $authCode);
+printf('access token: "%s"' . PHP_EOL, $token->getAccessToken());
+printf('user id: "%s" (only available on login)' . PHP_EOL, $token->getUserId());
+printf('user email: "%s" (only available on login)' . PHP_EOL, $token->getEmail());
+printf('user name: "%s" (only available on FIRST login)' . PHP_EOL, $token->getName() ?? '');
 
-$refreshedToken = $auth->getAccessToken($authCode);
-printf('user id: "%s"' . PHP_EOL, $refreshedToken->getUserId());
-printf('user email: "%s"' . PHP_EOL, $refreshedToken->getEmail());
-printf('user name: "%s" (only available on first login)' . PHP_EOL, implode(' ', $user['name'] ?? []));
+$refreshToken = $token->getRefreshToken() ?? $_REQUEST['token'] ?? null;
+if ($refreshToken) {
+    printf('<a href="auth.php?refresh=1&token=%s">Refresh</a>' . PHP_EOL, $refreshToken);
+}
+
+echo '<a href="/">Log in again</a>';
+
