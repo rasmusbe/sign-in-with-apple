@@ -2,10 +2,7 @@
 
 namespace SignInWithApple;
 
-use Jose\Component\Core\JWK;
-use Jose\Component\KeyManagement\JWKFactory;
-use Jose\Component\Signature\Algorithm\ES256;
-use Jose\Easy\Build;
+use Firebase\JWT\JWT;
 
 class ClientSecret
 {
@@ -22,20 +19,26 @@ class ClientSecret
     public function __construct(array $config, string $privateKeyPath)
     {
         $this->config     = $config;
-        $this->privateKey = JWKFactory::createFromKeyFile(
-            $privateKeyPath
-        );
+        $this->privateKey = file_get_contents($privateKeyPath);
     }
 
     public function generateToken(): string
     {
-        return Build::jws()
-            ->iss($this->config['team_id'] ?? '')
-            ->sub($this->config['client_id'] ?? '')
-            ->iat(time())
-            ->exp(strtotime('+5 months'))
-            ->claim('aud', 'https://appleid.apple.com')
-            ->alg((new ES256())->name())
-            ->sign($this->privateKey);
+//        return Build::jws()
+//            ->iss($this->config['team_id'] ?? '')
+//            ->sub($this->config['client_id'] ?? '')
+//            ->iat(time())
+//            ->exp()
+//            ->claim('aud', )
+//            ->alg((new ES256())->name())
+//            ->sign($this->privateKey);
+
+        return JWT::encode([
+            'iss' => $this->config['team_id'],
+            'sub' => $this->config['client_id'],
+            'iat' => time(),
+            'exp' => strtotime('+5 months'),
+            'aud' => 'https://appleid.apple.com',
+        ], $this->privateKey, 'ES256');
     }
 }

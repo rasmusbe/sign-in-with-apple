@@ -2,8 +2,9 @@
 
 namespace SignInWithApple;
 
-use Jose\Component\Signature\Serializer\CompactSerializer;
-use Jose\Component\Signature\Serializer\JWSSerializerManager;
+use Curl\Curl;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
 
 class AccessToken
 {
@@ -18,7 +19,7 @@ class AccessToken
     protected $refresh_token;
 
     /**
-     * @var array|null
+     * @var object|null
      */
     protected $id_token;
 
@@ -53,18 +54,18 @@ class AccessToken
 
     public function getUserId(): ?string
     {
-        return $this->id_token['sub'] ?? null;
+        return $this->id_token->sub ?? null;
     }
 
     public function getEmail(): ?string
     {
-        return $this->id_token['email'] ?? null;
+        return $this->id_token->email ?? null;
     }
 
     /**
-     * @return array
+     * @return object
      */
-    public function getIdToken(): array
+    public function getIdToken(): ?object
     {
         return $this->id_token;
     }
@@ -91,18 +92,18 @@ class AccessToken
         return $this->user['name']['lastName'] ?? null;
     }
 
-    protected function readIdToken(?string $id_token): array
+    protected function readIdToken(?string $id_token): ?object
     {
         if (is_null($id_token)) {
-            return [];
+            return null;
         }
 
-        $serializerManager = new JWSSerializerManager([
-            new CompactSerializer(),
-        ]);
+        $curl = new Curl();
+        $curl->setDefaultJsonDecoder(true);
+        $curl->get('https://appleid.apple.com/auth/keys');
 
-        $jws = $serializerManager->unserialize($id_token);
+        $keys = JWK::parseKeySet($curl->getResponse());
 
-        return json_decode($jws->getPayload(), true);
+        return JWT::decode($id_token, $keys, ['RS256']);
     }
 }
