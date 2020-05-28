@@ -13,10 +13,12 @@ $auth = new Auth($config, __DIR__ . DIRECTORY_SEPARATOR . 'AuthKey.p8');
 
 echo "<pre>";
 try {
-    if ($_REQUEST['refresh']) {
+    if (!empty($_REQUEST['refresh']) && isset($_REQUEST['token'])) {
         $token = $auth->getAccessToken($_REQUEST['token'], true);
-    } else {
+    } elseif (isset($_REQUEST['code'])) {
         $token = $auth->getAccessToken($_REQUEST['code']);
+    } else {
+        throw new UnexpectedValueException('Missing code or refresh token');
     }
 } catch (Exception $e) {
     printf('error: "%s"' . PHP_EOL, $e->getMessage());
@@ -29,7 +31,7 @@ if ($token) {
     printf('user email: "%s" (only available on login)' . PHP_EOL, $token->getEmail());
     printf('user name: "%s" (only available on FIRST login)' . PHP_EOL, $token->getFullName() ?? '');
     printf('refresh token: "%s"' . PHP_EOL, $refreshToken ?? '');
-    printf('id_token:' . PHP_EOL . '%s', print_r($token->getIdToken(), true));
+    printf('id_token: (only available on login)' . PHP_EOL . '%s', print_r($token->getIdToken(), true));
 }
 
 if ($refreshToken) {
