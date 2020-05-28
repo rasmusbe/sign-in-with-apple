@@ -22,5 +22,10 @@
     },
     "archive": {
         "exclude": ["/demo"]
+    },
+    "config": {
+        "platform": {
+            "php": "7.2"
+        }
     }
 }

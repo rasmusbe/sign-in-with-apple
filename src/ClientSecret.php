@@ -24,15 +24,6 @@ class ClientSecret
 
     public function generateToken(): string
     {
-//        return Build::jws()
-//            ->iss($this->config['team_id'] ?? '')
-//            ->sub($this->config['client_id'] ?? '')
-//            ->iat(time())
-//            ->exp()
-//            ->claim('aud', )
-//            ->alg((new ES256())->name())
-//            ->sign($this->privateKey);
-
         return JWT::encode([
             'iss' => $this->config['team_id'],
             'sub' => $this->config['client_id'],
