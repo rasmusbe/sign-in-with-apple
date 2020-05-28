@@ -2,10 +2,6 @@
 
 namespace SignInWithApple;
 
-use Curl\Curl;
-use Firebase\JWT\JWK;
-use Firebase\JWT\JWT;
-
 class AccessToken
 {
     /**
@@ -19,7 +15,7 @@ class AccessToken
     protected $refresh_token;
 
     /**
-     * @var object|null
+     * @var IdentityToken|null
      */
     protected $id_token;
 
@@ -34,7 +30,7 @@ class AccessToken
 
         $this->refresh_token = $appleResponse->refresh_token;
 
-        $this->id_token = $this->readIdToken($appleResponse->id_token);
+        $this->id_token = isset($appleResponse->id_token) ? new IdentityToken($appleResponse->id_token) : null;
 
         $this->user = isset($_POST['user']) ? json_decode($_POST['user'], true) : null;
     }
@@ -54,23 +50,20 @@ class AccessToken
 
     public function getUserId(): ?string
     {
-        return $this->id_token->sub ?? null;
+        return $this->getIdToken()->sub ?? null;
     }
 
     public function getEmail(): ?string
     {
-        return $this->id_token->email ?? null;
+        return $this->getIdToken()->email ?? null;
     }
 
-    /**
-     * @return object
-     */
-    public function getIdToken(): ?object
+    public function getIdToken(): ?IdentityToken
     {
         return $this->id_token;
     }
 
-    public function getName(): ?string
+    public function getFullName(): ?string
     {
         $firstName = $this->getFirstName() ?? '';
         $lastName  = $this->getLastName() ?? '';
@@ -90,20 +83,5 @@ class AccessToken
     public function getLastName(): ?string
     {
         return $this->user['name']['lastName'] ?? null;
-    }
-
-    protected function readIdToken(?string $id_token): ?object
-    {
-        if (is_null($id_token)) {
-            return null;
-        }
-
-        $curl = new Curl();
-        $curl->setDefaultJsonDecoder(true);
-        $curl->get('https://appleid.apple.com/auth/keys');
-
-        $keys = JWK::parseKeySet($curl->getResponse());
-
-        return JWT::decode($id_token, $keys, ['RS256']);
     }
 }
