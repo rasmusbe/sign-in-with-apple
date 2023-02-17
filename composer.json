@@ -6,7 +6,7 @@
         "php": "^7.2",
         "ext-json": "*",
         "php-curl-class/php-curl-class": "^8.7",
-        "firebase/php-jwt": "^5.2"
+        "firebase/php-jwt": "^5.2 || ^6.0"
     },
     "license": "MIT",
     "authors": [
